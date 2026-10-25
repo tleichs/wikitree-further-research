@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Further Research Finder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Further Research Finder</h1>
+      <p class="tagline">Before you visit an archive, see which WikiTree profiles from that place and period still have open questions.</p>
+      <p class="notice">Community prototype. Not an official WikiTree tool. It reads public data only.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="search" class="card no-print" autocomplete="off">
+      <div class="grid">
+        <label class="span2">Place
+          <input id="place" name="place" required placeholder="e.g. Zwickau, Sachsen  or  Icó, Ceará">
+          <small>Town or parish first. Anything after a comma must also appear in the location, which separates towns with the same name. Use a slash for alternatives, as in <code>Zwickau, Sachsen/Germany</code>.</small>
+        </label>
+        <label>From year
+          <input id="from" name="from" type="number" min="1000" max="2100" value="1750">
+        </label>
+        <label>To year
+          <input id="to" name="to" type="number" min="1000" max="2100" value="1800">
+        </label>
+        <label>Place match
+          <select id="scope" name="scope">
+            <option value="exact">This town or parish only</option>
+            <option value="area">Also places that mention it, such as villages in its district</option>
+          </select>
+        </label>
+        <label>Record wanted
+          <select id="wanted" name="wanted">
+            <option value="">Any</option>
+            <option value="baptism">Birth or baptism</option>
+            <option value="marriage">Marriage</option>
+            <option value="death">Death or burial</option>
+            <option value="parents">Parents</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" id="go">Search</button>
+        <label class="inline"><input type="checkbox" id="examples"> Show example requests</label>
+      </div>
+    </form>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+
+    <section id="results" hidden>
+      <div class="print-only" id="print-head"></div>
+
+      <div class="card" id="surnames-card">
+        <h2>Surnames to watch for</h2>
+        <p class="hint">Sorted by number of open questions. Select one to filter the lists below.</p>
+        <div id="surnames" class="chips"></div>
+      </div>
+
+      <div class="tabs no-print" role="tablist">
+        <button role="tab" id="tab-requests" aria-selected="true" data-panel="panel-requests">Open requests <span class="count" id="count-requests">0</span></button>
+        <button role="tab" id="tab-gaps" aria-selected="false" data-panel="panel-gaps">Data gaps <span class="count" id="count-gaps">0</span></button>
+      </div>
+
+      <div id="panel-requests" class="panel" role="tabpanel">
+        <p class="hint">Profiles where a contributor added the <code>{{Further Research}}</code> template for this place. These are questions someone is actively asking.</p>
+        <div id="requests"></div>
+      </div>
+
+      <div id="panel-gaps" class="panel" role="tabpanel" hidden>
+        <p class="hint">Profiles from this place and period with a missing birth, death or parents, or marked unsourced. Nobody necessarily asked for these, but the parish books could answer them.</p>
+        <div id="gaps"></div>
+      </div>
+
+      <div class="actions no-print">
+        <button type="button" id="csv">Download list (CSV)</button>
+        <button type="button" id="print">Print for the archive</button>
+      </div>
+      <p class="source" id="source-note"></p>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    Data: <a href="https://www.wikitree.com/wiki/Help:API_Documentation">WikiTree API</a> and <a href="https://plus.wikitree.com/">WikiTree+</a>.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

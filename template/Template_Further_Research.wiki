@@ -1,0 +1,51 @@
+<includeonly>{| class="further-research" style="width:100%; border:1px solid #9bb8a8; border-left:4px solid #2f6b4f; background:#f3f8f5; margin:0.5em 0;"
+| style="padding:4px 10px;" | '''Further research wanted'''{{#if:{{{place|}}}| in '''{{{place}}}'''}}{{#if:{{{place2|}}}| or '''{{{place2}}}'''}}{{#if:{{{place3|}}}| or '''{{{place3}}}'''}}{{#if:{{{period|}}}|, {{{period}}}}}{{#if:{{{wanted|}}}|<br/>Looking for: {{{wanted}}}}}{{#if:{{{source|}}}|<br/>Possible source: {{{source}}}}}{{#if:{{{note|}}}|<br/>{{{note}}}}}<br/><small>Have you seen this person in these records? Please leave a comment or contact the profile manager.</small>
+|}[[Category: Further Research Requests]]{{#if:{{{region|}}}|[[Category: {{{region}}}, Further Research Requests]]}}{{#if:{{{place|}}}||[[Category: Further Research Requests, Missing Place]]}}</includeonly><noinclude>
+== Purpose ==
+Marks a profile with a concrete open research question, and says where and when the answer may be found. Other researchers who work in the same records can then find the profile by place, even if they have never heard of the surname.
+
+Use it for brick walls (parents or origin unknown) and for "lost" relatives (for example a sibling whose marriage and death were never found). Do not use it on every profile.
+
+What has already been checked belongs in the '''Research Notes''' section. This template records only what is still wanted.
+
+== Usage ==
+Place it above the <code>== Biography ==</code> heading, like other research boxes such as Unsourced. It may also go at the top of a <code>== Further Research ==</code> section. A profile can carry several, for example one for a marriage and one for a death in different periods:
+
+<pre>
+== Further Research ==
+{{Further Research
+|place=Zwickau, Sachsen, Deutschland
+|region=Saxony
+|period=1750-1800
+|wanted=death, marriage
+|source=Stammbuch der Familie Fritz, Wildbach bei Zwickau
+|note=9 of 11 siblings found. No trace of him after his confirmation.
+}}
+</pre>
+
+== Parameters ==
+{| class="wikitable"
+! Parameter !! Required !! Meaning
+|-
+| place || yes || Town or parish where the record should be, written like a WikiTree location field (town, region, country).
+|-
+| place2, place3 || no || Further places, for example a neighbouring parish or an emigration destination.
+|-
+| region || no || A region with an existing location category, such as Saxony or Ceará, Brasil. Adds the profile to "Region, Further Research Requests".
+|-
+| period || no || Years in which the record is expected, such as 1750-1800, or a single year.
+|-
+| wanted || no || What is missing: birth, baptism, marriage, death, burial, parents, origin. Several values separated by commas.
+|-
+| source || no || A specific source that may hold the answer, especially one the manager cannot access.
+|-
+| note || no || One or two sentences of context.
+|}
+
+== Categories ==
+* Always: [[:Category: Further Research Requests]]
+* With region: Region, Further Research Requests
+* Without place: [[:Category: Further Research Requests, Missing Place]] (maintenance)
+
+[[Category: Research Templates]]
+</noinclude>
