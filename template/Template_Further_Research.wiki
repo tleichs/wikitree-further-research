@@ -1,5 +1,5 @@
 <includeonly>{| class="further-research" style="width:100%; border:1px solid #9bb8a8; border-left:4px solid #2f6b4f; background:#f3f8f5; margin:0.5em 0;"
-| style="padding:4px 10px;" | '''Further research wanted'''{{#if:{{{place|}}}| in '''{{{place}}}'''}}{{#if:{{{place2|}}}| or '''{{{place2}}}'''}}{{#if:{{{place3|}}}| or '''{{{place3}}}'''}}{{#if:{{{period|}}}|, {{{period}}}}}{{#if:{{{wanted|}}}|<br/>Looking for: {{{wanted}}}}}{{#if:{{{source|}}}|<br/>Possible source: {{{source}}}}}{{#if:{{{note|}}}|<br/>{{{note}}}}}<br/><small>Have you seen this person in these records? Please leave a comment or contact the profile manager.</small>
+| style="padding:4px 10px;" | '''Further research wanted'''{{#if:{{{place|}}}| {{#if:{{{radius|}}}|within {{{radius}}} km of|in}} '''{{{place}}}'''}}{{#if:{{{place2|}}}| or '''{{{place2}}}'''}}{{#if:{{{place3|}}}| or '''{{{place3}}}'''}}{{#if:{{{period|}}}|, {{{period}}}}}{{#if:{{{wanted|}}}|<br/>Looking for: {{{wanted}}}}}{{#if:{{{source|}}}|<br/>Possible source: {{{source}}}}}{{#if:{{{note|}}}|<br/>{{{note}}}}}<br/><small>Have you seen this person in these records? Please leave a comment or contact the profile manager.</small>
 |}[[Category: Further Research Requests]]{{#if:{{{region|}}}|[[Category: {{{region}}}, Further Research Requests]]}}{{#if:{{{place|}}}||[[Category: Further Research Requests, Missing Place]]}}</includeonly><noinclude>
 == Purpose ==
 Marks a profile with a concrete open research question, and says where and when the answer may be found. Other researchers who work in the same records can then find the profile by place, even if they have never heard of the surname.
@@ -23,6 +23,21 @@ Place it above the <code>== Biography ==</code> heading, like other research box
 }}
 </pre>
 
+When the parish is not known, name the places you suspect, or give one place and a radius:
+
+<pre>
+{{Further Research
+|place=Bethlehem, Northampton, Pennsylvania, United States
+|radius=20
+|region=Northampton County, Pennsylvania
+|period=1745-1760
+|wanted=baptism, parents
+|note=Family moved between Bethlehem, Nazareth and Emmaus. Baptism congregation unknown.
+}}
+</pre>
+
+Write the place so that it is unique. "Bethlehem" alone could also be a town in Connecticut, New York, New Jersey or New Hampshire.
+
 == Parameters ==
 {| class="wikitable"
 ! Parameter !! Required !! Meaning
@@ -30,6 +45,10 @@ Place it above the <code>== Biography ==</code> heading, like other research box
 | place || yes || Town or parish where the record should be, written like a WikiTree location field (town, region, country).
 |-
 | place2, place3 || no || Further places, for example a neighbouring parish or an emigration destination.
+|-
+| radius || no || Distance in kilometres. Use it when the parish is unknown but the area is known: the request then also appears for every town within this distance of the places. Keep it small, about 10 to 25 km, so that it reaches only the parishes that really come into question.
+|-
+| coords || no || Latitude and longitude of the centre, such as 50.714, 12.698. Only needed when the place name is ambiguous. Without it the place is looked up on OpenStreetMap.
 |-
 | region || no || A region with an existing location category, such as Northampton County, Pennsylvania. Adds the profile to "Region, Further Research Requests".
 |-

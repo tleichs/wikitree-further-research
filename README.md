@@ -59,11 +59,31 @@ The draft is in [template/Template_Further_Research.wiki](template/Template_Furt
 |---|---|---|
 | place | yes | Town or parish, written like a WikiTree location field |
 | place2, place3 | no | Other places, such as a neighbouring parish or an emigration destination |
+| radius | no | Distance in kilometres around the places, for when the parish is unknown |
+| coords | no | Latitude and longitude of the centre, only for ambiguous place names |
 | region | no | Region with an existing location category, which adds a regional category |
 | period | no | Years in which the record is expected, such as 1750-1800 |
 | wanted | no | birth, baptism, marriage, death, burial, parents, origin |
 | source | no | A specific source that may hold the answer |
 | note | no | One or two sentences of context |
+
+**When the congregation is unknown.** Often the area is known but not the congregation. A child of a family that moved between neighbouring settlements may have been baptised in any of them. There are two ways to say this:
+
+- **Name the suspected places** in `place`, `place2` and `place3`. The request appears when someone searches any of them.
+- **Give one place and a radius.** The request then appears for every town within that distance:
+
+```
+{{Further Research
+|place=Bethlehem, Northampton, Pennsylvania, United States
+|radius=20
+|period=1745-1760
+|wanted=baptism, parents
+}}
+```
+
+A researcher searching Emmaus, 13 km away, or Nazareth, 15 km away, sees this request. Both were early Moravian settlements near Bethlehem. One searching Lititz, another Moravian congregation 94 km away, or Philadelphia, 76 km away, does not. The app looks up both places on OpenStreetMap and shows the distance. The radius should stay small, about 10 to 25 km. A large radius puts the request in front of dozens of congregations that most likely don't hold the record, and readers learn to skip such requests.
+
+The place must be unique. "Bethlehem" alone could be a town in Connecticut, New York, New Jersey or New Hampshire, and the same happens with many European towns. The app shows which place it found, and `coords` fixes the centre when a name can't be made unique.
 
 **Categories it adds:**
 
@@ -116,6 +136,7 @@ The first two rows show why the place qualifier matters. Without it, "Bethlehem"
 
 - **WikiTree+ text search** finds candidate profile IDs: `BirthLocation=<town>`, `DeathLocation=<town>`, the same with `CategoryFull=Unsourced_Profiles`, and `CategoryFull=Further_Research_Requests` for requests.
 - **WikiTree API `getPeople`** loads live dates, places, parents and managers, up to 500 profiles per call. For requests it also loads the biography and parses the template parameters.
+- **OpenStreetMap's Nominatim service** looks up coordinates for radius requests and the searched place. The app sends at most one lookup per second and caches the results in the browser, as Nominatim's usage policy requires. The page credits OpenStreetMap.
 - All filtering by place, period and record type happens in the browser.
 - Every API call sends `appId=FurtherResearchFinder`.
 
@@ -146,6 +167,7 @@ Copy `index.html`, `app.js` and `style.css` into a folder on an apps.wikitree.co
 - **"Data gaps" are not requests.** A missing field may be known to the manager but not entered. The template is what shows that someone actually wants help.
 - **The tracking category is read as a whole.** That is fine for thousands of requests. With far more, the app should first narrow the search with the place.
 - **Common place names are slow.** The Bethlehem searches took 80 to 95 seconds, mostly for loading profiles that are then filtered out. A server-side index would make this fast.
+- **Radius requests are found by text search** for "Further Research" and "radius" until the tracking category exists. With many such requests, the app would geocode each one, and a hosted version should then store coordinates instead of asking Nominatim every time.
 - **Place matching is text-based.** It cannot know that two differently written parish names are the same place.
 
 ## Possible next steps

@@ -48,7 +48,7 @@ function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function norm(s) {
-  return String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+  return String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 function year(d) {
   const y = parseInt(String(d ?? "").slice(0, 4), 10);
@@ -251,32 +251,112 @@ function plainText(s) {
 // Every candidate is then checked by parsing the template itself.
 async function findRequests(q) {
   setStatus("Looking for Further Research requests…");
-  const plain = q.place.town.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const plain = q.place.town.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const searches = [`CategoryFull=${TRACKING_CATEGORY}`,
-    ...new Set([q.place.town, plain].map((t) => `"Further Research" ${plusValue(t)}`))];
+    ...new Set([q.place.town, plain].map((t) => `"Further Research" ${plusValue(t)}`)),
+    // Radius requests name a different town, so find them by the word "radius".
+    `"Further Research" radius`];
   const ids = [...new Set((await Promise.all(searches.map(plusSearch))).flat())];
   if (!ids.length) return [];
   const people = await getPeople(ids, PERSON_FIELDS, true);
+
+  let searchedPoint; // geocoded lazily, only if a radius request needs it
+  const searched = async () => (searchedPoint ??= await geocode(geocodeQuery(q.place)));
+
   const rows = [];
   for (const p of Object.values(people)) {
     for (const t of parseTemplates(p.bio)) {
-      const places = [t.place, t.place2, t.place3].filter(Boolean);
-      const hit = places.find((pl) => placeMatches(pl, q.place, q.scope));
-      if (!hit) continue;
       const { from, to } = periodOf(t);
       if (!rangesOverlap(from, to, q.from, q.to)) continue;
       const groups = wantedGroups(t.wanted);
       if (q.wanted && !groups.includes(q.wanted)) continue;
-      rows.push({ kind: "request", person: p, place: hit, from, to, wanted: t.wanted || "", groups, source: t.source || "", note: t.note || "" });
+
+      const places = [t.place, t.place2, t.place3].filter(Boolean);
+      const radius = parseFloat(String(t.radius ?? "").replace(",", "."));
+      let where = { place: places.find((pl) => placeMatches(pl, q.place, q.scope)) };
+
+      if (!where.place && radius > 0) {
+        setStatus("Looking up places on OpenStreetMap…");
+        const target = await searched();
+        if (!target) continue;
+        const fixed = parseCoords(t.coords);
+        const centres = [];
+        if (fixed) centres.push({ place: places[0] || t.coords, point: { ...fixed, name: `${fixed.lat}, ${fixed.lon}` } });
+        else for (const pl of places) centres.push({ place: pl, point: await geocode(pl) });
+        const near = centres
+          .filter((c) => c.point)
+          .map((c) => ({ ...c, km: distanceKm(c.point, target) }))
+          .filter((c) => c.km <= radius)
+          .sort((a, b) => a.km - b.km)[0];
+        if (!near) continue;
+        where = { place: near.place, km: near.km, resolved: near.point.name, target: target.name };
+      }
+      if (!where.place) continue;
+      rows.push({ kind: "request", person: p, where, places, radius: radius > 0 ? radius : null,
+        from, to, wanted: t.wanted || "", groups, source: t.source || "", note: t.note || "" });
     }
   }
   return rows;
 }
 
+/* ---------- distances (radius requests) ---------- */
+
+// OpenStreetMap Nominatim. Usage policy: at most one request per second,
+// cache results, show attribution. Fine for a prototype; a hosted app with
+// many users should use its own geocoder or a coordinates table.
+const GEOCODER = "https://nominatim.openstreetmap.org/search";
+const geoCache = new Map();
+let geoQueue = Promise.resolve();
+
+function geocodeQuery(place) {
+  // "Zwickau, Sachsen/Germany" -> "Zwickau, Sachsen" (first alternative)
+  return [place.town, ...place.qualifiers.map((x) => x.split("/")[0].trim())].join(", ");
+}
+
+function parseCoords(s) {
+  const m = String(s ?? "").match(/(-?\d+(?:\.\d+)?)\s*[,; ]\s*(-?\d+(?:\.\d+)?)/);
+  return m ? { lat: +m[1], lon: +m[2] } : null;
+}
+
+function distanceKm(a, b) {
+  const rad = (d) => (d * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+
+async function geocode(text) {
+  const key = norm(text);
+  if (!key) return null;
+  if (geoCache.has(key)) return geoCache.get(key);
+  try {
+    const stored = localStorage.getItem("frf-geo:" + key);
+    if (stored) { const v = JSON.parse(stored); geoCache.set(key, v); return v; }
+  } catch { /* storage unavailable */ }
+  const job = geoQueue.then(async () => {
+    const url = `${GEOCODER}?format=jsonv2&limit=1&accept-language=en&q=${encodeURIComponent(text)}`;
+    let result = null;
+    try {
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      if (res.ok) {
+        const hit = (await res.json())[0];
+        if (hit) result = { lat: +hit.lat, lon: +hit.lon, name: hit.display_name };
+      }
+    } catch { /* network error: treat as not found */ }
+    await new Promise((r) => setTimeout(r, 1100)); // one request per second
+    return result;
+  });
+  geoQueue = job.catch(() => null);
+  const result = await job;
+  geoCache.set(key, result);
+  try { if (result) localStorage.setItem("frf-geo:" + key, JSON.stringify(result)); } catch { /* ignore */ }
+  return result;
+}
+
 async function findGaps(q) {
   setStatus(`Searching WikiTree+ for profiles in ${q.place.label}…`);
   const term = plusValue(q.place.town);
-  const plain = q.place.town.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const plain = q.place.town.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const terms = [...new Set([term, plusValue(plain)])];
   const queries = [];
   for (const t of terms) queries.push(`BirthLocation=${t}`, `DeathLocation=${t}`);
@@ -318,7 +398,8 @@ function exampleRequests(q) {
   const mk = (first, last, b, d, wanted, source, note) => ({
     kind: "request", example: true,
     person: { Id: 0, Name: "", FirstName: first, LastNameAtBirth: last, BirthDate: b, DeathDate: d, BirthLocation: q.place.label },
-    place: q.place.label, from: q.from, to: q.to, wanted, groups: wantedGroups(wanted), source, note,
+    where: { place: q.place.label }, places: [q.place.label], radius: null,
+    from: q.from, to: q.to, wanted, groups: wantedGroups(wanted), source, note,
   });
   return [
     mk("John", "Example", `${q.from + 12}-00-00`, "", "death, marriage",
@@ -362,6 +443,20 @@ function visible(rows) {
   return state.surname ? rows.filter((r) => surnameOf(r.person) === state.surname) : rows;
 }
 
+// "Zschocken or Thierfeld", or for radius requests:
+// "within 20 km of Oelsnitz/Erzgeb. (6 km away)" with the resolved place names.
+function whereCell(r) {
+  const list = esc(r.places.join(" or "));
+  if (r.where.km == null) return r.radius ? `${list}<br><small>within ${esc(r.radius)} km</small>` : list;
+  const title = `Found as: ${r.where.resolved}. Search place found as: ${r.where.target}. Source: OpenStreetMap.`;
+  return `within ${esc(r.radius)} km of ${esc(r.where.place)}<br><small title="${esc(title)}">${Math.round(r.where.km)} km from ${esc(state.query.place.town)}</small>`;
+}
+
+function whereText(r) {
+  if (r.where.km == null) return r.places.join(" or ") + (r.radius ? ` (within ${r.radius} km)` : "");
+  return `within ${r.radius} km of ${r.where.place} (${Math.round(r.where.km)} km away)`;
+}
+
 function renderRequests() {
   const rows = visible(state.requests);
   $("count-requests").textContent = state.requests.length;
@@ -372,10 +467,11 @@ function renderRequests() {
     return;
   }
   $("requests").innerHTML = `<div class="table-wrap"><table>
-    <thead><tr><th>Person</th><th>Years</th><th>Looking for</th><th>Period</th><th>Possible source</th><th>Note</th><th>Contact</th></tr></thead>
+    <thead><tr><th>Person</th><th>Years</th><th>Where</th><th>Looking for</th><th>Period</th><th>Possible source</th><th>Note</th><th>Contact</th></tr></thead>
     <tbody>${rows.map((r) => `<tr>
       <td>${personCell(r)}</td>
       <td class="years">${esc(yearsText(r.person))}</td>
+      <td>${whereCell(r)}</td>
       <td>${r.groups.length ? tags(r.groups) : esc(r.wanted)}</td>
       <td class="years">${esc(r.from ?? "?")}–${esc(r.to ?? "?")}</td>
       <td>${esc(plainText(r.source))}</td>
@@ -441,18 +537,18 @@ function csvCell(v) {
 }
 
 function downloadCsv() {
-  const head = ["List", "Surname", "Name", "WikiTree ID", "Born", "Died", "Birth place", "Death place", "Looking for / missing", "Period", "Possible source", "Note", "Manager", "Link"];
+  const head = ["List", "Surname", "Name", "WikiTree ID", "Born", "Died", "Birth place", "Death place", "Where", "Looking for / missing", "Period", "Possible source", "Note", "Manager", "Link"];
   const lines = [head];
   for (const r of visible(state.requests)) {
     const p = r.person;
     lines.push(["Request" + (r.example ? " (EXAMPLE)" : ""), surnameOf(p), displayName(p), p.Name, year(p.BirthDate) ?? "", year(p.DeathDate) ?? "",
-      p.BirthLocation || "", p.DeathLocation || "", r.wanted, `${r.from ?? ""}-${r.to ?? ""}`, plainText(r.source), plainText(r.note),
+      p.BirthLocation || "", p.DeathLocation || "", whereText(r), r.wanted, `${r.from ?? ""}-${r.to ?? ""}`, plainText(r.source), plainText(r.note),
       state.managers[p.Manager]?.Name || "", p.Name ? profileUrl(p.Name) : ""]);
   }
   for (const r of visible(state.gaps)) {
     const p = r.person;
     lines.push(["Data gap", surnameOf(p), displayName(p), p.Name, year(p.BirthDate) ?? "", year(p.DeathDate) ?? "",
-      p.BirthLocation || "", p.DeathLocation || "", r.missing.map((m) => WANTED_LABELS[m] || m).join(", "), "", "", "",
+      p.BirthLocation || "", p.DeathLocation || "", "", r.missing.map((m) => WANTED_LABELS[m] || m).join(", "), "", "", "",
       state.managers[p.Manager]?.Name || "", profileUrl(p.Name)]);
   }
   const csv = "﻿" + lines.map((l) => l.map(csvCell).join(";")).join("\r\n");
