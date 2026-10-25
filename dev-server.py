@@ -88,7 +88,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     server = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     print(f"Further Research Finder: http://localhost:{PORT}/")
-    print("Example:  http://localhost:%d/?place=Zwickau,%%20Sachsen&from=1750&to=1800" % PORT)
+    print("Example:  http://localhost:%d/?place=Bethlehem,%%20Pennsylvania&from=1742&to=1801" % PORT)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

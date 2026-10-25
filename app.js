@@ -92,8 +92,8 @@ function parsePlace(input) {
   return { label: parts.join(", "), town: parts[0] || "", qualifiers: parts.slice(1) };
 }
 
-// exact: the first element of the location is the town ("Zwickau, Sachsen, Deutschland").
-// area:  the town appears anywhere ("Planitz, Zwickau, Sachsen" also matches).
+// exact: the first element of the location is the town ("Bethlehem, Northampton, Pennsylvania").
+// area:  the town appears anywhere ("Bethlehem Township, Northampton, Pennsylvania" also matches).
 function placeMatches(location, place, scope) {
   if (!location) return false;
   const loc = norm(location);
@@ -103,7 +103,7 @@ function placeMatches(location, place, scope) {
   const townOk = scope === "area"
     ? loc.includes(town)
     : first === town || first.startsWith(town + " (") || first.startsWith(town + " in ") || first.startsWith(town + " bei ");
-  // "Sachsen/Germany" means either one may appear.
+  // "Northampton/Lehigh" means either one may appear.
   return townOk && place.qualifiers.every((q) =>
     q.split("/").some((alt) => variantsOf(alt).some((v) => loc.includes(v))));
 }
@@ -321,12 +321,12 @@ function exampleRequests(q) {
     place: q.place.label, from: q.from, to: q.to, wanted, groups: wantedGroups(wanted), source, note,
   });
   return [
-    mk("Johann Gottfried", "Beispiel", `${q.from + 12}-00-00`, "", "death, marriage",
-      "", "9 of 11 siblings found. No trace of him after his confirmation."),
-    mk("Anna Maria", "Muster", "", `${q.from + 40}-00-00`, "parents, baptism",
-      "Family book of the parish, privately held", "Burial entry gives age 63 but no parents. Possibly from a neighbouring village."),
-    mk("Manoel", "Exemplo", `${q.from + 25}-00-00`, "", "baptism",
-      "", "Marriage record says only 'filho de Fulano, natural de Portugal'."),
+    mk("John", "Example", `${q.from + 12}-00-00`, "", "death, marriage",
+      "", "9 of 11 siblings found. No trace of him after 1770."),
+    mk("Mary", "Sample", "", `${q.from + 40}-00-00`, "parents, baptism",
+      "Family Bible, privately held", "Burial entry gives age 63 but no parents. Possibly from a neighbouring congregation."),
+    mk("Jacob", "Specimen", `${q.from + 25}-00-00`, "", "baptism, origin",
+      "", "Burial record says only 'a native of Germany'."),
   ].filter((r) => !q.wanted || r.groups.includes(q.wanted));
 }
 

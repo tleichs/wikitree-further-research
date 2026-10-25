@@ -14,12 +14,12 @@ Place it above the <code>== Biography ==</code> heading, like other research box
 <pre>
 == Further Research ==
 {{Further Research
-|place=Zwickau, Sachsen, Deutschland
-|region=Saxony
-|period=1750-1800
+|place=Bethlehem, Northampton, Pennsylvania, United States
+|region=Northampton County, Pennsylvania
+|period=1742-1801
 |wanted=death, marriage
-|source=Stammbuch der Familie Fritz, Wildbach bei Zwickau
-|note=9 of 11 siblings found. No trace of him after his confirmation.
+|source=His memoir (Lebenslauf), if one exists, at the Moravian Archives, Bethlehem
+|note=9 of 11 siblings found in the Bethlehem congregation registers. No trace of him after 1770.
 }}
 </pre>
 
@@ -31,9 +31,9 @@ Place it above the <code>== Biography ==</code> heading, like other research box
 |-
 | place2, place3 || no || Further places, for example a neighbouring parish or an emigration destination.
 |-
-| region || no || A region with an existing location category, such as Saxony or Ceará, Brasil. Adds the profile to "Region, Further Research Requests".
+| region || no || A region with an existing location category, such as Northampton County, Pennsylvania. Adds the profile to "Region, Further Research Requests".
 |-
-| period || no || Years in which the record is expected, such as 1750-1800, or a single year.
+| period || no || Years in which the record is expected, such as 1742-1801, or a single year.
 |-
 | wanted || no || What is missing: birth, baptism, marriage, death, burial, parents, origin. Several values separated by commas.
 |-

@@ -17,12 +17,12 @@ The template works on its own through category pages. The app adds filtering by 
 
 ## The problem, with examples
 
-**A trip to a parish archive.** A researcher has an appointment at the church archive in Zwickau to read the books from 1750 to 1800. WikiTree has 22 profiles born or died in the town of Zwickau in that period with missing parents, dates or sources. Nothing on WikiTree points the researcher to them.
+**A trip to a church archive.** A researcher has an appointment in the reading room of the [Moravian Archives](https://moravianarchives.org/requesting-a-research-visit/) in Bethlehem, Pennsylvania. The archive holds the registers of the Bethlehem Moravian congregation, kept in volumes from 1742 and written in German script. Researchers read them on site, by appointment only. WikiTree has 117 profiles born or died in Bethlehem, Pennsylvania between 1742 and 1801 with missing parents, dates or sources. Nothing on WikiTree points the researcher to them.
 
 **Three kinds of open questions** come up again and again:
 
-- **A vague hint.** A Brazilian marriage record says only "filho de Fulano, natural de Portugal". The answer is in records the manager has not identified yet.
-- **A known source the manager cannot reach.** For example, a privately held family book for one village. Someone who owns it could answer in minutes.
+- **A vague hint.** A burial record in Pennsylvania says only "a native of Germany". The answer is in records the manager has not identified yet.
+- **A known source the manager cannot reach.** For example, a memoir (Lebenslauf) held at the Moravian Archives in Bethlehem, when the manager lives far away. Someone who already has a reading room appointment could check it in minutes.
 - **A lost relative.** Nine of eleven siblings are documented, but two disappear. This is not a brick wall, because the family continues through the other siblings. It is still an open question.
 
 **Contributors already write this down, but it cannot be found.** These counts come from WikiTree+ text search, with data from 18 October 2026:
@@ -37,7 +37,7 @@ I checked a random sample of 400 "Further Research" matches. 84% contain the phr
 
 **Research Notes is not the right place.** Many contributors use Research Notes to record what they have already checked, so that nobody searches the same books twice. Further Research records what is still wanted. Keeping them apart keeps both useful.
 
-**Why not just a category.** A category can say "open question in Saxony". It cannot say which period, which record is missing, or which source might help. The template carries those details and still adds the category.
+**Why not just a category.** A category can say "open question in Pennsylvania". It cannot say which period, which record is missing, or which source might help. The template carries those details and still adds the category.
 
 ## Part 1: the template
 
@@ -46,12 +46,12 @@ The draft is in [template/Template_Further_Research.wiki](template/Template_Furt
 ```
 == Further Research ==
 {{Further Research
-|place=Zwickau, Sachsen, Deutschland
-|region=Saxony
-|period=1750-1800
+|place=Bethlehem, Northampton, Pennsylvania, United States
+|region=Northampton County, Pennsylvania
+|period=1742-1801
 |wanted=death, marriage
-|source=Stammbuch der Familie Fritz, Wildbach bei Zwickau
-|note=9 of 11 siblings found. No trace of him after his confirmation.
+|source=His memoir (Lebenslauf), if one exists, at the Moravian Archives, Bethlehem
+|note=9 of 11 siblings found in the Bethlehem congregation registers. No trace of him after 1770.
 }}
 ```
 
@@ -71,7 +71,7 @@ The draft is in [template/Template_Further_Research.wiki](template/Template_Furt
 - With `region`, **Region, Further Research Requests**. This mirrors how `{{Unsourced|Germany}}` feeds "Germany, Unsourced Profiles".
 - Without `place`, **Further Research Requests, Missing Place**, as a maintenance category.
 
-**Lessons from the Unsourced template.** WikiTree+ shows 989,907 profiles in Unsourced Profiles, but only 87 in Brazil, Unsourced Profiles and 10,552 in Germany, Unsourced Profiles. Most unsourced templates carry no place, mainly because the add-person form inserts the template automatically. For Further Research the place is the whole point, so it is required, and the template flags profiles without it.
+**Lessons from the Unsourced template.** WikiTree+ shows 989,907 profiles in Unsourced Profiles, but only 7,345 in Pennsylvania, Unsourced Profiles and 10,552 in Germany, Unsourced Profiles. Most unsourced templates carry no place, mainly because the add-person form inserts the template automatically. For Further Research the place is the whole point, so it is required, and the template flags profiles without it.
 
 **A pilot can start before the template exists.** The app finds requests in two ways: through the tracking category, and through a WikiTree+ text search for "Further Research" together with the town. It then reads the template parameters from each biography. So a few contributors can add the template text to their profiles as a trial, and the app finds them after the next WikiTree+ update. Until the template page exists, the profile shows a red template link instead of the box.
 
@@ -97,7 +97,7 @@ You enter a place, a period and optionally a record type. The app shows two list
 Above both lists, a **surname summary** shows which surnames to watch for in the books, sorted by number of open questions. Each row links to the profile and its manager. The list can be **printed** for the archive visit or **downloaded** as CSV. The search is kept in the link, so a category page or Space page can link straight to a ready-made search:
 
 ```
-https://apps.wikitree.com/apps/<account>/further-research/?place=Zwickau,%20Sachsen/Germany&from=1750&to=1800
+https://apps.wikitree.com/apps/<account>/further-research/?place=Bethlehem,%20Pennsylvania&from=1742&to=1801
 ```
 
 ### Results from live data
@@ -106,12 +106,11 @@ These searches ran against live WikiTree data on 25 October 2026:
 
 | Search | Profiles with gaps |
 |---|---|
-| Zwickau, 1750-1800, town only | 22 |
-| Zwickau, Sachsen/Germany, 1750-1800, town only | 15 |
-| Zwickau and villages in its district, 1750-1800 | 114 |
-| Icó, Ceará, 1850-1900 | 5 |
+| Bethlehem, 1742-1801, town only | 365 |
+| Bethlehem, Pennsylvania, 1742-1801, town only | 117 |
+| Bethlehem, Pennsylvania, 1742-1801, including places that mention Bethlehem | 242 |
 
-The first two rows show why the place qualifier matters. Six of the 22 "Zwickau" profiles are from **Zwickau in Bohemia**, now Cvikov in Czechia, written "Zwickau, Gabel, Böhmen, Österreich". One more has only "Zwickau" with no region. The qualifier "Sachsen/Germany" removes all seven. The app also treats common language variants as equal, such as Sachsen and Saxony, or Brasil and Brazil.
+The first two rows show why the place qualifier matters. Without it, "Bethlehem" also finds towns of that name in Connecticut, New York, New Jersey and New Hampshire. The qualifier "Pennsylvania" removes them. It still matches colonial forms such as "Northampton, Province of Pennsylvania". A slash allows alternatives, for example "Bethlehem, Northampton/Lehigh" for a town that lies in two counties. The third row adds places whose location mentions Bethlehem anywhere, such as townships around the town. The app also treats common language variants of region names as equal, such as Sachsen and Saxony.
 
 ### How it works
 
@@ -127,11 +126,11 @@ It reads public data only and writes nothing. When it runs on apps.wikitree.com 
 Python 3 is required. Nothing needs to be installed.
 
 ```
-cd WikiTree_Further_Research
+cd wikitree-further-research
 python3 dev-server.py
 ```
 
-Then open `http://localhost:8765/?place=Zwickau,%20Sachsen/Germany&from=1750&to=1800`.
+Then open `http://localhost:8765/?place=Bethlehem,%20Pennsylvania&from=1742&to=1801`.
 
 The WikiTree API only accepts browser requests from apps.wikitree.com. The small local server forwards requests to the WikiTree API and WikiTree+, and only to those two hosts. It also works around WikiTree+ offering only older TLS 1.2 ciphers, which current Python rejects by default. Certificates are still verified.
 
@@ -146,12 +145,13 @@ Copy `index.html`, `app.js` and `style.css` into a folder on an apps.wikitree.co
 - **Private profiles hide dates,** so some apparent gaps are not real gaps.
 - **"Data gaps" are not requests.** A missing field may be known to the manager but not entered. The template is what shows that someone actually wants help.
 - **The tracking category is read as a whole.** That is fine for thousands of requests. With far more, the app should first narrow the search with the place.
+- **Common place names are slow.** The Bethlehem searches took 80 to 95 seconds, mostly for loading profiles that are then filtered out. A server-side index would make this fast.
 - **Place matching is text-based.** It cannot know that two differently written parish names are the same place.
 
 ## Possible next steps
 
 1. Discussion with the Templates and Categorization projects, and a G2G post for community feedback.
-2. A trial with a few contributors and one project, for example the Germany or Brazil project.
+2. A trial with a few contributors and one project, for example a One Place Study.
 3. Hosting the app on apps.wikitree.com and linking it from the category page.
 4. Later, a WikiTree Browser Extension feature that shows "open questions in this place" on profile pages.
 5. Later, a "sources cited for this place and period" view, built from the citations in existing biographies. It would help researchers discover collections they did not know existed.
